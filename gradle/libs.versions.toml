@@ -12,11 +12,54 @@ composeMultiplatform = "1.8.1"
 kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
 
+decompose = "3.3.0"
+essenty = "2.5.0"
+reaktive = "2.2.0"
+mvi = "4.3.0"
+
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+decompose-compose-experimental = { module = "com.arkivanov.decompose:extensions-compose-experimental", version.ref = "decompose" }
+essenty-lifecycle = { group = "com.arkivanov.essenty", name = "lifecycle", version.ref = "essenty" }
+essenty-stateKeeper = { group = "com.arkivanov.essenty", name = "state-keeper", version.ref = "essenty" }
+essenty-instanceKeeper = { group = "com.arkivanov.essenty", name = "instance-keeper", version.ref = "essenty" }
+essenty-backHandler = { group = "com.arkivanov.essenty", name = "back-handler", version.ref = "essenty" }
+essenty-lifecycle-coroutines = { group = "com.arkivanov.essenty", name = "lifecycle-coroutines", version.ref = "essenty" }
+
+#mvi-kotlin
+mvikotlin = { group = "com.arkivanov.mvikotlin", name = "mvikotlin", version.ref = "mvi" }
+mvikotlin-main = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-main", version.ref = "mvi" }
+mvikotlin-logging = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-logging", version.ref = "mvi" }
+mvikotlin-timetravel = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-timetravel", version.ref = "mvi" }
+mvikotlin-extensions-coroutines = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-extensions-coroutines", version.ref = "mvi" }
+
+reaktive-reaktive = { group = "com.badoo.reaktive", name = "reaktive", version.ref = "reaktive" }
+reaktive-coroutinesInterop = { group = "com.badoo.reaktive", name = "coroutines-interop", version.ref = "reaktive" }
+
+
+[bundles]
+decompose = [
+    "decompose",
+    "essenty-lifecycle",
+    "essenty-stateKeeper",
+    "essenty-instanceKeeper",
+    "essenty-backHandler",
+    "essenty-lifecycle-coroutines"
+]
+reaktive = ["reaktive-reaktive", "reaktive-coroutinesInterop"]
+mvi = [
+    "mvikotlin",
+    "mvikotlin-main",
+    "mvikotlin-logging",
+    "mvikotlin-timetravel",
+    "mvikotlin-extensions-coroutines"
+]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
