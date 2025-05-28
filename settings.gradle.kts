@@ -35,5 +35,6 @@ plugins {
 
 include(":composeApp")
 
-include(":feature")
+include(":common")
 
+include(":feature")
