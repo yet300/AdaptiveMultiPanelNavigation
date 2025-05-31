@@ -17,6 +17,10 @@ The project showcases a flexible navigation architecture that adapts to differen
 https://github.com/user-attachments/assets/d4e4c0fd-2ce2-4d32-8bc2-d19e56f1c154
 
 
+https://github.com/user-attachments/assets/bd63b889-90c0-4946-ab36-aa516f8a145d
+
+
+
 
 # Stack
 * Kotlin
