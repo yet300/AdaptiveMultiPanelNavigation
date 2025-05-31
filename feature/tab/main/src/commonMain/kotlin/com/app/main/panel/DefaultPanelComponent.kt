@@ -26,9 +26,7 @@ import com.app.settings.detail.DefaultSettingsDetailsComponent
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
-/**
- *      ⚠️ WARNING: StateKeeper for this 'lastSelectedDetailConfig' is currently NOT persisting state.
- */
+
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalSerializationApi::class)
 class DefaultPanelComponent(
     componentContext: ComponentContext,
@@ -44,17 +42,29 @@ class DefaultPanelComponent(
     private val _mode = MutableValue(ChildPanelsMode.SINGLE)
     override val mode: Value<ChildPanelsMode> = _mode
 
-    private var lastSelectedDetailConfig: DetailPanelConfig? =
+    private var lastSelectedMessageDetailConfig: DetailPanelConfig.Message? =
         stateKeeper.consume(
-            key = "lastSelectedDetailConfig",
-            strategy = DetailPanelConfig.serializer()
+            key = "lastSelectedMessageConfig",
+            strategy = DetailPanelConfig.Message.serializer()
+        )
+
+    private var lastSelectedSettingDetailConfig: DetailPanelConfig.Setting? =
+        stateKeeper.consume(
+            key = "lastSelectedSettingsTypeConfig",
+            strategy = DetailPanelConfig.Setting.serializer()
         )
 
     init {
         stateKeeper.register(
-            key = "lastSelectedDetailConfig",
-            strategy = DetailPanelConfig.serializer()
-        ) { lastSelectedDetailConfig }
+            key = "lastSelectedMessageDetailConfig",
+            strategy = DetailPanelConfig.Message.serializer()
+        ) { lastSelectedMessageDetailConfig }
+
+        stateKeeper.register(
+            key = "lastSelectedSettingDetailConfig",
+            strategy = DetailPanelConfig.Setting.serializer()
+        ) { lastSelectedSettingDetailConfig }
+
     }
 
     private val tabComponent: TabComponent =
@@ -71,13 +81,13 @@ class DefaultPanelComponent(
             onChatClick = { itemId ->
                 panelsNavigation.navigate { currentPanels ->
                     val newDetailsConfig = DetailPanelConfig.Message(messageId = itemId)
-                    lastSelectedDetailConfig = newDetailsConfig
+                    lastSelectedMessageDetailConfig = newDetailsConfig
                     currentPanels.copy(details = newDetailsConfig)
                 }
             },
             selectedSetting = navState.map { panelsState ->
-                if (panelsState.details is DetailPanelConfig.SettingsDetails) {
-                    (panelsState.details as DetailPanelConfig.SettingsDetails).settingType
+                if (panelsState.details is DetailPanelConfig.Setting) {
+                    (panelsState.details as DetailPanelConfig.Setting).settingType
                 } else {
                     null
                 }
@@ -85,8 +95,8 @@ class DefaultPanelComponent(
             onOpenSettingDetails = { settingType ->
                 panelsNavigation.navigate { currentPanels ->
                     val newDetailsConfig =
-                        DetailPanelConfig.SettingsDetails(settingType = settingType)
-                    lastSelectedDetailConfig = newDetailsConfig
+                        DetailPanelConfig.Setting(settingType = settingType)
+                    lastSelectedSettingDetailConfig = newDetailsConfig
                     currentPanels.copy(details = newDetailsConfig)
                 }
             }
@@ -100,10 +110,20 @@ class DefaultPanelComponent(
                 _navState.onNext(newState)
                 val currentDetail = newState.details
                 if (currentDetail != oldState?.details) {
-                    lastSelectedDetailConfig = currentDetail
+                    when (currentDetail) {
+                        is DetailPanelConfig.Message -> {
+                            lastSelectedMessageDetailConfig = currentDetail
+                        }
+
+                        is DetailPanelConfig.Setting -> {
+                            lastSelectedSettingDetailConfig = currentDetail
+                        }
+
+                        null -> {}
+                    }
                 }
             },
-            initialPanels = { Panels(main = MainPanelConfig, details = lastSelectedDetailConfig) },
+            initialPanels = { Panels(main = MainPanelConfig) },
             handleBackButton = true,
             mainFactory = { config, ctx ->
                 PanelComponent.MainTab(tabComponent)
@@ -118,18 +138,18 @@ class DefaultPanelComponent(
                             isBackButtonVisible = navState.map { it.mode.isSingle },
                             onBacked = {
                                 panelsNavigation.pop()
-                                lastSelectedDetailConfig = null
+                                lastSelectedMessageDetailConfig = null
                             },
                         )
                     )
 
-                    is DetailPanelConfig.SettingsDetails -> PanelComponent.DetailPanel.SettingsDetails(
+                    is DetailPanelConfig.Setting -> PanelComponent.DetailPanel.SettingsDetails(
                         component = DefaultSettingsDetailsComponent(
                             componentContext = ctx,
                             settingType = config.settingType,
                             onBacked = {
                                 panelsNavigation.pop()
-                                lastSelectedDetailConfig = null
+                                lastSelectedSettingDetailConfig = null
                             }
                         )
                     )
@@ -151,11 +171,7 @@ class DefaultPanelComponent(
         panelsNavigation.navigate { currentPanels ->
             currentPanels.copy(
                 main = MainPanelConfig,
-                details = if (currentPanels.mode == ChildPanelsMode.SINGLE) {
-                    null
-                } else {
-                    if (lastSelectedDetailConfig is DetailPanelConfig.Message) lastSelectedDetailConfig else null
-                }
+                details = if (currentPanels.mode.isSingle) null else lastSelectedMessageDetailConfig
             )
         }
     }
@@ -165,11 +181,7 @@ class DefaultPanelComponent(
         panelsNavigation.navigate { currentPanels ->
             currentPanels.copy(
                 main = MainPanelConfig,
-                details = if (currentPanels.mode == ChildPanelsMode.SINGLE) {
-                    null
-                } else {
-                    if (lastSelectedDetailConfig is DetailPanelConfig.SettingsDetails) lastSelectedDetailConfig else null
-                }
+                details = if (currentPanels.mode.isSingle) null else lastSelectedSettingDetailConfig
             )
         }
     }
@@ -183,6 +195,6 @@ class DefaultPanelComponent(
         data class Message(val messageId: Long?) : DetailPanelConfig
 
         @Serializable
-        data class SettingsDetails(val settingType: SettingType) : DetailPanelConfig
+        data class Setting(val settingType: SettingType) : DetailPanelConfig
     }
 }
