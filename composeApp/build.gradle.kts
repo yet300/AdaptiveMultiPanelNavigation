@@ -28,6 +28,11 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(projects.feature.root)
+
+            export(libs.bundles.decompose)
+            export(libs.essenty.backHandler)
+
         }
     }
     
@@ -61,13 +66,25 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            api(projects.feature.root)
+
+            api(projects.feature.tab.main)
+            api(projects.feature.tab.chat)
+            api(projects.feature.tab.settings)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.materialIconsExtended)
+
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            api(libs.bundles.decompose)
+            implementation(libs.decompose.compose)
+            implementation(libs.decompose.compose.experimental)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
