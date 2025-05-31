@@ -26,6 +26,9 @@ import com.app.settings.detail.DefaultSettingsDetailsComponent
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
+/**
+ *      ⚠️ WARNING: StateKeeper for this 'lastSelectedDetailConfig' is currently NOT persisting state.
+ */
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalSerializationApi::class)
 class DefaultPanelComponent(
     componentContext: ComponentContext,
