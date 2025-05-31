@@ -67,40 +67,19 @@ class DefaultPanelComponent(
 
     }
 
-    private val tabComponent: TabComponent =
-        DefaultTabComponent(
-            componentContext = this,
-            storeProvider = storeFactory,
-            selectedChatId = navState.map { panelsState ->
-                if (panelsState.details is DetailPanelConfig.Message) {
-                    (panelsState.details as DetailPanelConfig.Message).messageId
-                } else {
-                    null
-                }
-            },
-            onChatClick = { itemId ->
-                panelsNavigation.navigate { currentPanels ->
-                    val newDetailsConfig = DetailPanelConfig.Message(messageId = itemId)
-                    lastSelectedMessageDetailConfig = newDetailsConfig
-                    currentPanels.copy(details = newDetailsConfig)
-                }
-            },
-            selectedSetting = navState.map { panelsState ->
-                if (panelsState.details is DetailPanelConfig.Setting) {
-                    (panelsState.details as DetailPanelConfig.Setting).settingType
-                } else {
-                    null
-                }
-            },
-            onOpenSettingDetails = { settingType ->
-                panelsNavigation.navigate { currentPanels ->
-                    val newDetailsConfig =
-                        DetailPanelConfig.Setting(settingType = settingType)
-                    lastSelectedSettingDetailConfig = newDetailsConfig
-                    currentPanels.copy(details = newDetailsConfig)
-                }
-            }
-        )
+
+    private val tabComponent: TabComponent = DefaultTabComponent(
+        componentContext = this,
+        storeProvider = storeFactory,
+        selectedChatId = navState.map { state ->
+            (state.details as? DetailPanelConfig.Message)?.messageId
+        },
+        selectedSetting = navState.map { state ->
+            (state.details as? DetailPanelConfig.Setting)?.settingType
+        },
+        onChatClick = ::selectChat,
+        onOpenSettingDetails = ::selectSetting
+    )
 
     override val panels: Value<ChildPanels<*, PanelComponent.MainTab, *, PanelComponent.DetailPanel, Nothing, Nothing>> =
         childPanels(
@@ -108,20 +87,7 @@ class DefaultPanelComponent(
             serializers = MainPanelConfig.serializer() to DetailPanelConfig.serializer(),
             onStateChanged = { newState, oldState ->
                 _navState.onNext(newState)
-                val currentDetail = newState.details
-                if (currentDetail != oldState?.details) {
-                    when (currentDetail) {
-                        is DetailPanelConfig.Message -> {
-                            lastSelectedMessageDetailConfig = currentDetail
-                        }
-
-                        is DetailPanelConfig.Setting -> {
-                            lastSelectedSettingDetailConfig = currentDetail
-                        }
-
-                        null -> {}
-                    }
-                }
+                updateSelection(newState.details)
             },
             initialPanels = { Panels(main = MainPanelConfig) },
             handleBackButton = true,
@@ -136,10 +102,7 @@ class DefaultPanelComponent(
                             provideStoreFactory = storeFactory,
                             chatId = config.messageId,
                             isBackButtonVisible = navState.map { it.mode.isSingle },
-                            onBacked = {
-                                panelsNavigation.pop()
-                                lastSelectedMessageDetailConfig = null
-                            },
+                            onBacked = { handleBack(config) }
                         )
                     )
 
@@ -147,10 +110,7 @@ class DefaultPanelComponent(
                         component = DefaultSettingsDetailsComponent(
                             componentContext = ctx,
                             settingType = config.settingType,
-                            onBacked = {
-                                panelsNavigation.pop()
-                                lastSelectedSettingDetailConfig = null
-                            }
+                            onBacked = { handleBack(config) }
                         )
                     )
                 }
@@ -168,21 +128,54 @@ class DefaultPanelComponent(
 
     override fun openChats() {
         tabComponent.openChats()
-        panelsNavigation.navigate { currentPanels ->
-            currentPanels.copy(
-                main = MainPanelConfig,
-                details = if (currentPanels.mode.isSingle) null else lastSelectedMessageDetailConfig
-            )
-        }
+        navigateToTab(lastSelectedMessageDetailConfig)
     }
 
     override fun openSettings() {
         tabComponent.openSettings()
+        navigateToTab(lastSelectedSettingDetailConfig)
+    }
+
+    private fun selectChat(chatId: Long?) {
+        val newConfig = DetailPanelConfig.Message(messageId = chatId)
+        lastSelectedMessageDetailConfig = newConfig
+        navigateTo(newConfig)
+    }
+
+    private fun selectSetting(settingType: SettingType) {
+        val newConfig = DetailPanelConfig.Setting(settingType = settingType)
+        lastSelectedSettingDetailConfig = newConfig
+        navigateTo(newConfig)
+    }
+
+    private fun navigateTo(config: DetailPanelConfig) {
+        panelsNavigation.navigate { currentPanels ->
+            currentPanels.copy(details = config)
+        }
+    }
+
+    private fun navigateToTab(config: DetailPanelConfig?) {
         panelsNavigation.navigate { currentPanels ->
             currentPanels.copy(
                 main = MainPanelConfig,
-                details = if (currentPanels.mode.isSingle) null else lastSelectedSettingDetailConfig
+                details = if (currentPanels.mode.isSingle) null else config
             )
+        }
+    }
+
+    private fun updateSelection(detail: DetailPanelConfig?) {
+        when (detail) {
+            is DetailPanelConfig.Message -> lastSelectedMessageDetailConfig = detail
+            is DetailPanelConfig.Setting -> lastSelectedSettingDetailConfig = detail
+            null -> {}
+        }
+    }
+
+    private fun handleBack(config: DetailPanelConfig) {
+        panelsNavigation.pop()
+        when (config) {
+            is DetailPanelConfig.Message -> lastSelectedMessageDetailConfig = null
+            is DetailPanelConfig.Setting -> lastSelectedSettingDetailConfig = null
         }
     }
 
