@@ -12,9 +12,15 @@
 This Kotlin Multiplatform project demonstrates an adaptive multi-panel navigation system inspired by popular messaging apps like Telegram and WhatsApp. It is designed to work seamlessly across Android, iOS, Desktop, leveraging the power of Compose Multiplatform and Decompose for a consistent and responsive user experience.
 The project showcases a flexible navigation architecture that adapts to different screen sizes and device types, providing a modern, multi-panel interface for desktops and tablets while maintaining usability on mobile devices.
 
-https://github.com/yet300/AdaptiveMultiPanelNavigation/blob/main/docs/media/desktop.mp4
 
-https://github.com/yet300/AdaptiveMultiPanelNavigation/blob/main/docs/media/Simulator%20Screen%20Recording%20-%20iPad%20(10th%20generation)%20-%202025-05-31%20at%2016.17.56.mp4
+
+https://github.com/user-attachments/assets/d4e4c0fd-2ce2-4d32-8bc2-d19e56f1c154
+
+
+https://github.com/user-attachments/assets/702ddf51-f1ad-4932-b55e-6ea9f3d8dd97
+
+
+
 
 # Stack
 * Kotlin
