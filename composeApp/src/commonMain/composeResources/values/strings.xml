@@ -1,0 +1,8 @@
+<resources>
+    <string name="chats">Chats</string>
+    <string name="settings">Settings</string>
+
+    <string name="select_detail">Select a chat to start messaging</string>
+    <string name="type_placeholder">Type a message...</string>
+
+</resources>
