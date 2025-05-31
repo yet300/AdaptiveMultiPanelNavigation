@@ -38,3 +38,9 @@ include(":composeApp")
 include(":common")
 
 include(":feature")
+include(":feature:root")
+
+include(":feature:tab")
+include(":feature:tab:main")
+include(":feature:tab:chat")
+include(":feature:tab:settings")
